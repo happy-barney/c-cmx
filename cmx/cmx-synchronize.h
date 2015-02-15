@@ -7,24 +7,25 @@
 #include <cmx/cmx-synchronize-internal.h>
 
 #define CMX_SYNCHRONIZE                                                 \
-    CMX_SYNCHRONIZE_INTERNAL_IMPL_1 (                                   \
+    CMX_SYNCHRONIZE_INTERNAL_TRAN (                                     \
         VALUE,                                                          \
         DO,                                                             \
         CMX_UNIQUE_TOKEN (CMX_SYNCHRONIZE),                             \
         CMX_MUTEX_STATIC_INIT,                                          \
         1                                                               \
     )
-/**<Synchronize following statement / block
+/**<Synchronize following block
  **
  ** Macro generates break-safe code.
  ** Macro generates single statement code.
+ ** Single or empty statement can be used as block
  **
  ** Usage:
  ** CMX_SYNCHRONIZE { ... }
  **/
 
 #define CMX_SYNCHRONIZE_WITH(Mutex)                                     \
-    CMX_SYNCHRONIZE_INTERNAL_IMPL_1 (                                   \
+    CMX_SYNCHRONIZE_INTERNAL_TRAN (                                     \
         PTR,                                                            \
         DO,                                                             \
         CMX_UNIQUE_TOKEN (CMX_SYNCHRONIZE_WITH),                        \
@@ -45,7 +46,7 @@
  **/
 
 #define CMX_SYNCHRONIZE_IF(Cond)                                        \
-    CMX_SYNCHRONIZE_INTERNAL_IMPL_1 (                                   \
+    CMX_SYNCHRONIZE_INTERNAL_TRAN (                                     \
         VALUE,                                                          \
         COND,                                                           \
         CMX_UNIQUE_TOKEN (CMX_SYNCHRONIZE_IF),                          \
@@ -69,7 +70,7 @@
  **/
 
 #define CMX_SYNCHRONIZE_IF_WITH(Init, Cond)                             \
-    CMX_SYNCHRONIZE_INTERNAL_IMPL_1 (                                   \
+    CMX_SYNCHRONIZE_INTERNAL_TRAN (                                     \
         PTR,                                                            \
         COND,                                                           \
         CMX_UNIQUE_TOKEN (CMX_SYNCHRONIZE_IF),                          \
@@ -97,11 +98,11 @@
  **/
 
 #define CMX_RUN_ONCE                                                    \
-    CMX_RUN_ONCE_IMPL_1 (                                               \
+    CMX_RUN_ONCE_TRAN (                                                 \
         CMX_UNIQUE_TOKEN (CMX_RUN_ONCE)                                 \
     )
 /**<Keyword-like expression to evaluate following statement only once.
- ** Supports also optional else-clause evaluated on following pass.
+ ** Supports also optional else-clause evaluated on subsequent call.
  **
  ** Statement evaluation is synchronized.
  **
@@ -113,8 +114,8 @@
  **   CMX_RUN_ONCE { ... } else { ... }
  **/
 
-#define CMX_RUN_ONCE_IMPL_1(Prefix)                                     \
-    CMX_RUN_ONCE_IMPL_2 (                                               \
+#define CMX_RUN_ONCE_TRAN(Prefix)                                       \
+    CMX_RUN_ONCE_IMPL (                                                 \
         CMX_TOKEN (Prefix, State),                                      \
         CMX_TOKEN (Prefix, Body),                                       \
         CMX_TOKEN (Prefix, Else)                                        \
@@ -123,7 +124,7 @@
  ** tokens used by implementation macro
  **/
 
-#define CMX_RUN_ONCE_IMPL_2(State, Body, Else)                          \
+#define CMX_RUN_ONCE_IMPL(State, Body, Else)                            \
     CMX_SYNCHRONIZE                                                     \
     if (1) {                                                            \
         static int State = 0;                                           \

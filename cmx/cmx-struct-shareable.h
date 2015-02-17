@@ -83,6 +83,12 @@ struct _CMX_Struct_Shareable {
  **   };
  **/
 
+#define CMX_STRUCT_SHAREABLE_INIT(Ptr)                                  \
+    do {                                                                \
+        if (NULL != (Ptr))                                              \
+            (Ptr)->CMX_STRUCT_SHAREABLE_NAME.enabled = 0;               \
+    } while (0);
+
 #define CMX_STRUCT_SHAREABLE_SHARE(Ptr)                                 \
     CMX_STRUCT_SHAREABLE_SHARE_TRAN (                                   \
         (Ptr),                                                          \

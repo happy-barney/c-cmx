@@ -19,6 +19,9 @@
  **   Macro may define its own temporary variables suffixing Var parameter.
  **   Macro may expand into multistatement code.
  **
+ **   Macro usage:
+ **     Expr = CMX_MUTEX_INIT (Expr)
+ **
  ** - CMX_MUTEX_LOCK (Var)
  **   Lock mutex.
  **   Var is a CMX_ATOMIC_TYPE variable.

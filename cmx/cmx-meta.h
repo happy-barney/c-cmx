@@ -3,12 +3,46 @@
  **
  ** Helper meta programming macros for custom control structures.
  **
- ** See: http://www.chiark.greenend.org.uk/~sgtatham/mp/
+ ** Based on article: http://www.chiark.greenend.org.uk/~sgtatham/mp/
  **
  **/
 
-#ifndef CMX_META_BODY_H
-#define CMX_META_BODY_H 1
+#ifndef CMX_META_H
+#define CMX_META_H 1
+
+#define CMX_META_TEMPLATE(Prefix, Pre, Post, Do)                        \
+    CMX_META_TEMPLATE_TRAN (                                            \
+        CMX_UNIQUE_TOKEN (Prefix),                                      \
+        Pre, Post, Do                                                   \
+    )
+
+#define CMX_META_TEMPLATE_TRAN(Prefix, Pre, Post, Do)                   \
+    CMX_META_TEMPLATE_IMPL (                                            \
+        CMX_TOKEN (Prefix, p),                                          \
+        CMX_TOKEN (Prefix, l_body),                                     \
+        CMX_TOKEN (Prefix, l_else),                                     \
+        CMX_TOKEN (Prefix, l_finish),                                   \
+        Pre, Post, Do                                                   \
+    )
+
+#define CMX_META_TEMPLATE_IMPL(Prefix, Body, Else, Finish, Pre, Post, Do) \
+    if (1) {                                                            \
+        Pre (Prefix, Body, Else);                                       \
+    Finish: CMX_LABEL_UNUSED;                                           \
+        Post (Prefix, Body, Else);                                      \
+    } else Do (Prefix, Body, Else, Finish)
+
+#define CMX_META_TEMPLATE_BODY(Prefix, Body, Else, Finish)              \
+    CMX_META_BODY_BREAK (Body, Finish)
+
+#define CMX_META_TEMPLATE_BODY_ELSE(Prefix, Body, Else, Finish)         \
+    CMX_META_BODY_ELSE_BREAK (Body, Finish)
+
+#define CMX_META_TEMPLATE_DO(Prefix, Body, Else, Finish)                \
+    CMX_META_DO_BREAK (Body)
+
+#define CMX_META_TEMPLATE_DO_ELSE(Prefix, Body, Else, Finish)           \
+    CMX_META_DO_ELSE_BREAK (Body, Else)
 
 #define CMX_META_BODY_BREAK(Body, Finish)                               \
     while (1)                                                           \

@@ -23,6 +23,7 @@
 
 #include <cmx/cmx-token.h>
 #include <cmx/cmx-meta.h>
+#include <cmx/cmx-local.h>
 #include <cmx/cmx-synchronize.h>
 #include <cmx/cmx-struct-refs.h>
 #include <cmx/cmx-struct-shareable.h>

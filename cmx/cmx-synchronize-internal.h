@@ -3,7 +3,7 @@
 #define CMX_SYNCHRONIZE_INTERNAL_H 1
 
 #include <cmx/cmx-token.h>
-#include <cmx/cmx-meta-body.h>
+#include <cmx/cmx-meta.h>
 
 #define CMX_SYNCHRONIZE_INTERNAL_TRAN(Type, Do, Prefix, Init, Cond)     \
     CMX_SYNCHRONIZE_INTERNAL_IMPL (                                     \

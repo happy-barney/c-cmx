@@ -3,7 +3,7 @@
 #define CMX_SYNCHRONIZE_H 1
 
 #include <cmx/cmx-token.h>
-#include <cmx/cmx-meta-body.h>
+#include <cmx/cmx-meta.h>
 #include <cmx/cmx-synchronize-internal.h>
 
 #define CMX_SYNCHRONIZE                                                 \

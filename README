@@ -1,0 +1,73 @@
+
+General Information
+===================
+
+CMX is C preprocessor (macro) library designed to simplify
+C programs
+
+Installation
+============
+
+See file 'INSTALL'
+
+How to report bug and/or participate
+====================================
+
+Visit project on github:
+
+https://github.com/happy-barney/c-cmx
+
+Parts
+=====
+
+* cmx-struct-refs
+
+Helps to implement struct ref counting
+
+Example:
+   CMX_STRUCT_REFS_UNREF (ptr) {
+       /* executed when ref count drops to 0 */
+   }
+
+* cmx-struct-shareable
+
+Macros to implement uniform way how to treat struct's flow mutex
+if enabled
+
+Example:
+  foo (struct Foo *ptr) {
+      CMX_STRUCT_SHAREABLE_SYNCHRONIZE (ptr) {
+      }
+  }
+
+* cmx-synchronize
+
+Providing CMX_SYNCHRONIZE and CMX_RUN_ONCE allows you to simplify
+(ie, hides) mutex operations into one keyword-look-like macro
+
+Example:
+  foo_init (void) {
+      CMX_RUN_ONCE {
+          foo = ...;
+          bar = ...;
+      }
+  }
+
+* cmx-local
+
+Stores variable value, executes block and restore its value.
+Macros can be serialized.
+
+Example:
+  foo () {
+      int i = 1;
+      int j = 1;
+
+      CMX_LOCAL (i)
+          printf ("%d %d\n", ++i, ++j); /* 2 2 */
+      printf ("%d %d\n", ++i, ++j); /* 2 3 */
+      CMX_LOCAL (i) CMX_LOCAL (j)
+          printf ("%d %d\n", ++i, ++j); /* 3 4 */
+      printf ("%d %d\n", ++i, ++j); /* 3 4 */
+  }
+

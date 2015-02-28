@@ -1,0 +1,21 @@
+
+CMX v1.0.0
+==========
+
+Initial release with:
+
+* cmx-token
+* cmx-meta
+* cmx-struct-refs
+* cmx-struct-shareable
+* cmx-synchronize
+
+Environments:
+
+* cmx-env-default
+* cmx-env-posix
+* cmx-env-glib
+
+Compiler specific environment:
+
+* cmx-env-gcc

@@ -28,8 +28,8 @@
 
 #define CMX_LOCAL(Var)                                                  \
     CMX_LOCAL_TRAN (                                                    \
-        (Var),                                                          \
-        CMX_UNIQUE_TOKEN (CMX_LOCAL)                                    \
+        CMX_UNIQUE_TOKEN (CMX_LOCAL),                                   \
+        (Var)                                                           \
     )
 /**<Make Var value local, revert to origin value after block finishes.
  ** Var value is intact
@@ -38,24 +38,24 @@
  ** Block can be terminated by break.
  **/
 
-#define CMX_LOCAL_TRAN(Var, Prefix)                                     \
+#define CMX_LOCAL_TRAN(Prefix, Var)                                     \
     CMX_LOCAL_IMPL (                                                    \
-        (Var),                                                          \
         CMX_TOKEN (Prefix, Name),                                       \
         CMX_TOKEN (Prefix, Body),                                       \
-        CMX_TOKEN (Prefix, Finish)                                      \
+        CMX_TOKEN (Prefix, Finish),                                     \
+        (Var)                                                           \
     )
 /**<Transient macro to expand arguments and define tokens required
  ** by implementation macro
  **/
 
-#define CMX_LOCAL_IMPL(Var, Name, Body, Finish)                         \
+#define CMX_LOCAL_IMPL(Name, Body, Finish, Var)                         \
     if (1) {                                                            \
-        CMX_LOCAL_SET_STORE (Name, Var);                                \
+        CMX_LOCAL_STORE (Name, Var);                                    \
         goto Body;                                                      \
     Finish:                                                             \
-        CMX_LOCAL_SET_RESTORE (Name, Var);                              \
-    } CMX_META_BODY_BREAK (Body, Finish)
+        CMX_LOCAL_RESTORE (Name, Var);                                  \
+    } else CMX_META_BODY_BREAK (Body, Finish)
 /**<Implementation macro
  **/
 

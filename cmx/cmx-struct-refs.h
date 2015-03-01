@@ -28,22 +28,6 @@
  **   to define your ref/unref functions
  **/
 
-#ifndef CMX_ATOMIC_INT_TYPE
-#error "cmx-struct-refs.h requires CMX_ATOMIC_INT_TYPE (see cmx-env.h)"
-#endif
-
-#ifndef CMX_ATOMIC_INT_SET
-#error "cmx-struct-refs.h requires CMX_ATOMIC_INT_SET (see cmx-env.h)"
-#endif
-
-#ifndef CMX_ATOMIC_INT_INCREMENT
-#error "cmx-struct-refs.h requires CMX_ATOMIC_INT_INCREMENT (see cmx-env.h)"
-#endif
-
-#ifndef CMX_ATOMIC_INT_DECREMENT_AND_TEST
-#error "cmx-struct-refs.h requires CMX_ATOMIC_INT_DECREMENT_AND_TEST (see cmx-env.h)"
-#endif
-
 #ifndef CMX_STRUCT_REFS_NAME
 #define CMX_STRUCT_REFS_NAME                                            \
     cmx_refs

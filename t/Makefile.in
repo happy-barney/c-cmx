@@ -75,7 +75,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-TESTS = struct-refs$(EXEEXT) struct-shareable$(EXEEXT)
+TESTS = struct-refs$(EXEEXT) struct-shareable$(EXEEXT) local$(EXEEXT)
 check_PROGRAMS = $(am__EXEEXT_1)
 subdir = t
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
@@ -87,7 +87,11 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__EXEEXT_1 = struct-refs$(EXEEXT) struct-shareable$(EXEEXT)
+am__EXEEXT_1 = struct-refs$(EXEEXT) struct-shareable$(EXEEXT) \
+	local$(EXEEXT)
+local_SOURCES = local.c
+local_OBJECTS = local.$(OBJEXT)
+local_LDADD = $(LDADD)
 struct_refs_SOURCES = struct-refs.c
 struct_refs_OBJECTS = struct-refs.$(OBJEXT)
 struct_refs_LDADD = $(LDADD)
@@ -122,8 +126,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = struct-refs.c struct-shareable.c
-DIST_SOURCES = struct-refs.c struct-shareable.c
+SOURCES = local.c struct-refs.c struct-shareable.c
+DIST_SOURCES = local.c struct-refs.c struct-shareable.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -476,6 +480,10 @@ $(am__aclocal_m4_deps):
 clean-checkPROGRAMS:
 	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 
+local$(EXEEXT): $(local_OBJECTS) $(local_DEPENDENCIES) $(EXTRA_local_DEPENDENCIES) 
+	@rm -f local$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(local_OBJECTS) $(local_LDADD) $(LIBS)
+
 struct-refs$(EXEEXT): $(struct_refs_OBJECTS) $(struct_refs_DEPENDENCIES) $(EXTRA_struct_refs_DEPENDENCIES) 
 	@rm -f struct-refs$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(struct_refs_OBJECTS) $(struct_refs_LDADD) $(LIBS)
@@ -490,6 +498,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/local.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct-refs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct-shareable.Po@am__quote@
 
@@ -712,6 +721,13 @@ struct-refs.log: struct-refs$(EXEEXT)
 struct-shareable.log: struct-shareable$(EXEEXT)
 	@p='struct-shareable$(EXEEXT)'; \
 	b='struct-shareable'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+local.log: local$(EXEEXT)
+	@p='local$(EXEEXT)'; \
+	b='local'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

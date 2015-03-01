@@ -7,7 +7,7 @@
 #ifndef CMX_ENV_GCC_DEFINE_H
 #define CMX_ENV_GCC_DEFINE_H 1
 
-#ifdef HAVE_CMX_ENV_GCC
+#ifdef __GNUC__
 
 #define CMX_ENV_GCC_ATOMIC_INT_TYPE                                     \
     int

@@ -45,22 +45,6 @@
 #include <cmx/cmx-meta.h>
 #include <cmx/cmx-synchronize.h>
 
-#ifndef CMX_MUTEX_TYPE
-#error "cmx-share-shareable.h requires CMX_MUTEX_TYPE (see cmx-env.h)"
-#endif
-
-#ifndef CMX_MUTEX_INIT
-#error "cmx-share-shareable.h requires CMX_MUTEX_INIT (see cmx-env.h)"
-#endif
-
-#ifndef CMX_MUTEX_LOCK
-#error "cmx-share-shareable.h requires CMX_MUTEX_LOCK (see cmx-env.h)"
-#endif
-
-#ifndef CMX_MUTEX_UNLOCK
-#error "cmx-share-shareable.h requires CMX_MUTEX_UNLOCK (see cmx-env.h)"
-#endif
-
 struct _CMX_Struct_Shareable {
     int enabled;
     CMX_MUTEX_TYPE mutex;

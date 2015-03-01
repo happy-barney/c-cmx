@@ -1,4 +1,7 @@
 
+#ifndef CMX_STRUCT_SHAREABLE_H
+#define CMX_STRUCT_SHAREABLE_H 1
+
 /** @file
  **
  ** @section Summary
@@ -37,8 +40,10 @@
  ** - call your share function to enable feature
  **/
 
-#ifndef CMX_STRUCT_SHAREABLE_H
-#define CMX_STRUCT_SHAREABLE_H 1
+#include <cmx/cmx-env.h>
+#include <cmx/cmx-token.h>
+#include <cmx/cmx-meta.h>
+#include <cmx/cmx-synchronize.h>
 
 #ifndef CMX_MUTEX_TYPE
 #error "cmx-share-shareable.h requires CMX_MUTEX_TYPE (see cmx-env.h)"
@@ -88,13 +93,15 @@ struct _CMX_Struct_Shareable {
         if (NULL != (Ptr))                                              \
             (Ptr)->CMX_STRUCT_SHAREABLE_NAME.enabled = 0;               \
     } while (0);
+/**<Initialize data declared by CMX_STRUCT_SHAREABLE_DEFINE
+ **/
 
 #define CMX_STRUCT_SHAREABLE_SHARE(Ptr)                                 \
     CMX_STRUCT_SHAREABLE_SHARE_TRAN (                                   \
-        (Ptr),                                                          \
-        CMX_UNIQUE_TOKEN (CMX_STRUCT_SHAREABLE_SHARE)                   \
+        CMX_UNIQUE_TOKEN (CMX_STRUCT_SHAREABLE_SHARE),                  \
+        (Ptr)                                                           \
     )
-/** Defines core body of *_share function.
+/**<Defines core body of *_share function.
  ** Macro recognizes following BLOCK and ELSE statements.
  **
  ** BLOCK is executed only once, when share is enabled
@@ -110,24 +117,25 @@ struct _CMX_Struct_Shareable {
  ** struct xyz * xyz_share (struct xyz *)
  **/
 
-#define CMX_STRUCT_SHAREABLE_SHARE_TRAN(Ptr, Prefix)                    \
+#define CMX_STRUCT_SHAREABLE_SHARE_TRAN(Prefix, Ptr)                    \
     CMX_STRUCT_SHAREABLE_SHARE_IMPL (                                   \
-        (Ptr),                                                          \
         CMX_TOKEN (Prefix, Body),                                       \
         CMX_TOKEN (Prefix, Else),                                       \
-        CMX_TOKEN (Prefix, Finish)                                      \
+        CMX_TOKEN (Prefix, Finish),                                     \
+        (Ptr)                                                           \
     )
-/**< Transition macro to expand arguments and provide tokens required
- **  by implementation macro.
+/**<Transition macro to expand arguments and provide tokens required
+ ** by implementation macro.
  **/
 
-#define CMX_STRUCT_SHAREABLE_SHARE_IMPL(Ptr, Body, Else, Finish)        \
+#define CMX_STRUCT_SHAREABLE_SHARE_IMPL(Body, Else, Finish, Ptr)        \
     if (1) {                                                            \
         if (NULL != (Ptr)) {                                            \
             if (! ((Ptr)->CMX_STRUCT_SHAREABLE_NAME.enabled)) {         \
                 (Ptr)->CMX_STRUCT_SHAREABLE_NAME.enabled = 1;           \
-                (Ptr)->CMX_STRUCT_SHAREABLE_NAME.mutex =                \
-                    CMX_MUTEX_STATIC_INIT;                              \
+                CMX_MUTEX_INIT (                                        \
+                    (Ptr)->CMX_STRUCT_SHAREABLE_NAME.mutex              \
+                );                                                      \
                 goto Body;                                              \
             } else {                                                    \
                 goto Else;                                              \
@@ -141,8 +149,8 @@ struct _CMX_Struct_Shareable {
 
 #define CMX_STRUCT_SHAREABLE_SYNCHRONIZE(Ptr)                           \
     CMX_STRUCT_SHAREABLE_SYNCHRONIZE_TRAN (                             \
-        (Ptr),                                                          \
-        CMX_UNIQUE_TOKEN (CMX_STRUCT_SHAREABLE_SYNCHRONIZE)             \
+        CMX_UNIQUE_TOKEN (CMX_STRUCT_SHAREABLE_SYNCHRONIZE),            \
+        (Ptr)                                                           \
     )
 /**<Synchronize BLOCK evaluation using struct pointer.
  ** Synchronization is used only if struct sharing was enabled.
@@ -164,35 +172,34 @@ struct _CMX_Struct_Shareable {
  **   }
  **/
 
-#define CMX_STRUCT_SHAREABLE_SYNCHRONIZE_TRAN(Ptr, Prefix)              \
+#define CMX_STRUCT_SHAREABLE_SYNCHRONIZE_TRAN(Prefix, Ptr)              \
     CMX_STRUCT_SHAREABLE_SYNCHRONIZE_IMPL (                             \
-        (Ptr),                                                          \
-        CMX_TOKEN (Prefix, Mutex),                                      \
         CMX_TOKEN (Prefix, Body),                                       \
-        CMX_TOKEN (Prefix, Finish)                                      \
+        CMX_TOKEN (Prefix, Finish),                                     \
+        (Ptr)                                                           \
     )
-/**< Transition macro to expand arguments and provide tokens required
- **  by implementation macro.
+/**<Transition macro to expand arguments and provide tokens required
+ ** by implementation macro.
  **/
 
-#define CMX_STRUCT_SHAREABLE_SYNCHRONIZE_IMPL(Ptr, Name, Body, Finish)  \
-    if ((NULL == (Ptr)))                                                \
-        ;                                                               \
-    else if (! (Ptr)->CMX_STRUCT_SHAREABLE_NAME.enabled)                \
-        goto Body;                                                      \
-    else CMX_SYNCHRONIZE_INTERNAL_IMPL (                                \
-             CMX_SYNCHRONIZE_INTERNAL_MUTEX_PTR_TYPE,                   \
-             CMX_SYNCHRONIZE_INTERNAL_MUTEX_PTR_VAR,                    \
-             CMX_SYNCHRONIZE_INTERNAL_DO_DO_JUMP,                       \
-             CMX_SYNCHRONIZE_INTERNAL_DO_DO_BODY,                       \
-             Name,                                                      \
-             Body,                                                      \
-             Else,                                                      \
-             Finish,                                                    \
-             (Ptr)->CMX_STRUCT_SHAREABLE_NAME.mutex,                    \
-             1                                                          \
-    )
+#define CMX_STRUCT_SHAREABLE_SYNCHRONIZE_IMPL(Body, Finish, Ptr)        \
+    if (1) {                                                            \
+        if ((NULL == (Ptr)))                                            \
+            ;                                                           \
+        else if (! (Ptr)->CMX_STRUCT_SHAREABLE_NAME.enabled)            \
+            goto Body;                                                  \
+        else {                                                          \
+            CMX_MUTEX_LOCK ((Ptr)->CMX_STRUCT_SHAREABLE_NAME.mutex);    \
+            goto Body;                                                  \
+        }                                                               \
+    Finish:                                                             \
+        if ((Ptr)->CMX_STRUCT_SHAREABLE_NAME.enabled)                   \
+            CMX_MUTEX_UNLOCK ((Ptr)->CMX_STRUCT_SHAREABLE_NAME.mutex);  \
+    } else CMX_META_BODY_BREAK (Body, Finish)
 /**<Implementation macro
+ **
+ ** - if Struct ptr is NULL, skip protected block
+ ** - if shareable is not enabled, skip mutex 
  **/
 
 #endif  /* header guard */

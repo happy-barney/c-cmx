@@ -75,8 +75,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-TESTS = struct-refs$(EXEEXT)
-check_PROGRAMS = struct-refs$(EXEEXT)
+TESTS = struct-refs$(EXEEXT) struct-shareable$(EXEEXT)
+check_PROGRAMS = $(am__EXEEXT_1)
 subdir = t
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/depcomp $(top_srcdir)/test-driver
@@ -87,9 +87,13 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
+am__EXEEXT_1 = struct-refs$(EXEEXT) struct-shareable$(EXEEXT)
 struct_refs_SOURCES = struct-refs.c
 struct_refs_OBJECTS = struct-refs.$(OBJEXT)
 struct_refs_LDADD = $(LDADD)
+struct_shareable_SOURCES = struct-shareable.c
+struct_shareable_OBJECTS = struct-shareable.$(OBJEXT)
+struct_shareable_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -118,8 +122,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = struct-refs.c
-DIST_SOURCES = struct-refs.c
+SOURCES = struct-refs.c struct-shareable.c
+DIST_SOURCES = struct-refs.c struct-shareable.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -476,6 +480,10 @@ struct-refs$(EXEEXT): $(struct_refs_OBJECTS) $(struct_refs_DEPENDENCIES) $(EXTRA
 	@rm -f struct-refs$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(struct_refs_OBJECTS) $(struct_refs_LDADD) $(LIBS)
 
+struct-shareable$(EXEEXT): $(struct_shareable_OBJECTS) $(struct_shareable_DEPENDENCIES) $(EXTRA_struct_shareable_DEPENDENCIES) 
+	@rm -f struct-shareable$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(struct_shareable_OBJECTS) $(struct_shareable_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -483,6 +491,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct-refs.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct-shareable.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -696,6 +705,13 @@ recheck: all $(check_PROGRAMS)
 struct-refs.log: struct-refs$(EXEEXT)
 	@p='struct-refs$(EXEEXT)'; \
 	b='struct-refs'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+struct-shareable.log: struct-shareable$(EXEEXT)
+	@p='struct-shareable$(EXEEXT)'; \
+	b='struct-shareable'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

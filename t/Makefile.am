@@ -1,8 +1,11 @@
 
 AM_CFLAGS = -I$(top_srcdir) -g
 
-TESTS = struct-refs
+TESTS = 				\
+	struct-refs			\
+	struct-shareable		\
+	$(NULL)
 
 check_PROGRAMS = 			\
-	struct-refs 			\
+	$(TESTS)			\
 	$(NULL)

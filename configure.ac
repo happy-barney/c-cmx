@@ -7,11 +7,12 @@ dnl AC_CONFIG_MACRO_DIR([aclocal.d])
 
 AM_INIT_AUTOMAKE([subdir-objects])
 
-# AC_PROG_CC
-# AC_PROG_CC_C99
+AC_PROG_CC
+AC_PROG_CC_C99
 
 AC_CONFIG_FILES([
     Makefile
+    t/Makefile
     cmx.pc
 ])
 

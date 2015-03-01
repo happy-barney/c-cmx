@@ -1,4 +1,11 @@
 
+#ifndef CMX_STRUCT_REFS_H
+#define CMX_STRUCT_REFS_H 1
+
+#include <cmx/cmx-token.h>
+#include <cmx/cmx-meta.h>
+#include <cmx/cmx-env.h>
+
 /** @file
  **
  ** @section Summary
@@ -11,7 +18,7 @@
  ** duplication. These macros helps you to implement it
  ** "properly".
  **
- ** Macros require environment with CMX_ATOMIC_ defined
+ ** Macros require environment with CMX_ATOMIC_INT_ defined
  **
  ** @section Proposed usage
  **
@@ -21,23 +28,20 @@
  **   to define your ref/unref functions
  **/
 
-#ifndef CMX_STRUCT_REFS_H
-#define CMX_STRUCT_REFS_H 1
-
-#ifndef CMX_ATOMIC_TYPE
-#error "cmx-struct-refs.h requires CMX_ATOMIC_TYPE (see cmx-env.h)"
+#ifndef CMX_ATOMIC_INT_TYPE
+#error "cmx-struct-refs.h requires CMX_ATOMIC_INT_TYPE (see cmx-env.h)"
 #endif
 
-#ifndef CMX_ATOMIC_SET
-#error "cmx-struct-refs.h requires CMX_ATOMIC_SET (see cmx-env.h)"
+#ifndef CMX_ATOMIC_INT_SET
+#error "cmx-struct-refs.h requires CMX_ATOMIC_INT_SET (see cmx-env.h)"
 #endif
 
-#ifndef CMX_ATOMIC_INCREMENT
-#error "cmx-struct-refs.h requires CMX_ATOMIC_INCREMENT (see cmx-env.h)"
+#ifndef CMX_ATOMIC_INT_INCREMENT
+#error "cmx-struct-refs.h requires CMX_ATOMIC_INT_INCREMENT (see cmx-env.h)"
 #endif
 
-#ifndef CMX_ATOMIC_DECREMENT_AND_TEST
-#error "cmx-struct-refs.h requires CMX_ATOMIC_DECREMENT_AND_TEST (see cmx-env.h)"
+#ifndef CMX_ATOMIC_INT_DECREMENT_AND_TEST
+#error "cmx-struct-refs.h requires CMX_ATOMIC_INT_DECREMENT_AND_TEST (see cmx-env.h)"
 #endif
 
 #ifndef CMX_STRUCT_REFS_NAME
@@ -48,13 +52,13 @@
 #endif
 
 #define CMX_STRUCT_REFS_DEFINE                                          \
-    CMX_ATOMIC_TYPE CMX_STRUCT_REFS_NAME
+    CMX_ATOMIC_INT_TYPE CMX_STRUCT_REFS_NAME
 /**<Structure member definition
  **
  ** Uses CMX_STRUCT_REFS_NAME as member name
  **
  ** Macro uses:
- **  CMX_ATOMIC_TYPE
+ **  CMX_ATOMIC_INT_TYPE
  **  CMX_STRUCT_REFS_NAME
  **
  ** Usage:
@@ -65,18 +69,18 @@
  **/
 
 #define CMX_STRUCT_REFS_INIT(Ptr)                                       \
-    CMX_ATOMIC_SET ((Ptr)->CMX_STRUCT_REFS_NAME, 1)
+    CMX_ATOMIC_INT_SET ((Ptr)->CMX_STRUCT_REFS_NAME, 1)
 /**<Initialize ref counter
  **
  ** Uses:
- ** - CMX_ATOMIC_SET
+ ** - CMX_ATOMIC_INT_SET
  ** - CMX_STRUCT_REFS_NAME
  **/
 
 #define CMX_STRUCT_REFS_REF(Ptr)                                        \
     CMX_STRUCT_REFS_REF_TRAN (                                          \
-        (Ptr),                                                          \
-        CMX_UNIQUE_TOKEN (CMX_STRUCT_REFS_REF)                          \
+        CMX_UNIQUE_TOKEN (CMX_STRUCT_REFS_REF),                         \
+        (Ptr)                                                           \
     )
 /**<Define body of ref function
  **
@@ -90,7 +94,7 @@
  ** Macro generates single statement code.
  **
  ** Macro uses:
- ** - CMX_ATOMIC_INCREMENT
+ ** - CMX_ATOMIC_INT_INCREMENT
  ** - CMX_STRUCT_REFS_NAME
  **
  ** Usage:
@@ -99,20 +103,20 @@
  **   }
  **/
 
-#define CMX_STRUCT_REFS_REF_TRAN(Ptr, Prefix)                           \
+#define CMX_STRUCT_REFS_REF_TRAN(Prefix, Ptr)                           \
     CMX_STRUCT_REFS_REF_IMPL (                                          \
-        (Ptr),                                                          \
         CMX_TOKEN (Prefix, Body),                                       \
-        CMX_TOKEN (Prefix, Finish)                                      \
+        CMX_TOKEN (Prefix, Finish),                                     \
+        (Ptr)                                                           \
     )
 /**<Transient macro to evaluate arguments and generate tokens
  ** required by implementation macro
  **/
 
-#define CMX_STRUCT_REFS_REF_IMPL(Ptr, Body, Finish)                     \
+#define CMX_STRUCT_REFS_REF_IMPL(Body, Finish, Ptr)                     \
     if (1) {                                                            \
         if (NULL != (Ptr)) {                                            \
-            CMX_ATOMIC_INCREMENT ((Ptr)->CMX_STRUCT_REFS_NAME);         \
+            CMX_ATOMIC_INT_INCREMENT ((Ptr)->CMX_STRUCT_REFS_NAME);     \
             goto Body;                                                  \
         }                                                               \
     Finish:                                                             \
@@ -138,7 +142,7 @@
  ** Macro generates single statement code.
  **
  ** Uses
- ** - CMX_ATOMIC_DECREMENT_AND_TEST
+ ** - CMX_ATOMIC_INT_DECREMENT_AND_TEST
  ** - CMX_STRUCT_REFS_NAME
  **
  ** Usage:
@@ -161,7 +165,7 @@
 #define CMX_STRUCT_REFS_UNREF_IMPL(Ptr, Body, Else)                     \
     if (1) {                                                            \
         if (NULL != (Ptr)) {                                            \
-            if (CMX_ATOMIC_DECREMENT_AND_TEST ((Ptr)->CMX_STRUCT_REFS_NAME)) \
+            if (CMX_ATOMIC_INT_DECREMENT_AND_TEST ((Ptr)->CMX_STRUCT_REFS_NAME)) \
                 goto Body;                                              \
             else                                                        \
                 goto Else;                                              \

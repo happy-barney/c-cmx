@@ -1,6 +1,8 @@
 
 ACLOCAL_AMFLAGS = -I aclocal.d ${ACLOCAL_FLAGS}
-AM_CFLAGS = -I$(top_srcdir) -Wall
+AM_CFLAGS = -I$(top_srcdir)
+
+SUBDIRS = . t
 
 EXTRA_DIST = 				\
 	cmx.pc    			\

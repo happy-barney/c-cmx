@@ -5,8 +5,11 @@ AM_CFLAGS = -I$(top_srcdir)
 SUBDIRS = . t
 
 EXTRA_DIST = 				\
-	cmx.pc    			\
+	cmx.pc.in 			\
 	$(NULL)
+
+pkgconfigdir = @pkgconfigdir@
+pkgconfig_DATA = cmx.pc
 
 cmxincludedir = $(includedir)/cmx
 cmxinclude_HEADERS = 			\

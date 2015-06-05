@@ -38,6 +38,7 @@ cmxinclude_HEADERS = 			\
 	cmx/cmx-struct-refs.h		\
 	cmx/cmx-struct-shareable.h	\
 	cmx/cmx-synchronize.h		\
+	cmx/cmx-synchronize-internal.h	\
 	cmx/cmx-token.h			\
 	$(NULL)
 

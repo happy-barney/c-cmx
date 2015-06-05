@@ -9,7 +9,7 @@
 
 #ifdef HAVE_CMX_ENV_GLIB
 
-#include <gwlib.h>
+#include <glib.h>
 
 #define CMX_ENV_GLIB_MUTEX_TYPE                                         \
     GMutex

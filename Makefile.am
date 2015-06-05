@@ -1,15 +1,29 @@
 
 ACLOCAL_AMFLAGS = -I aclocal.d ${ACLOCAL_FLAGS}
-AM_CFLAGS = -I$(top_srcdir)
 
-SUBDIRS = . t
+AM_CFLAGS =				\
+	-I$(top_srcdir)			\
+	$(NULL)
+
+SUBDIRS =				\
+	.				\
+	t				\
+	$(NULL)
 
 EXTRA_DIST = 				\
-	cmx.pc.in 			\
+	cmx.pc.in			\
+	cmx.m4				\
+	$(NULL)
+
+m4datadir = $(datadir)/aclocal
+m4data_DATA =				\
+	cmx.m4				\
 	$(NULL)
 
 pkgconfigdir = @pkgconfigdir@
-pkgconfig_DATA = cmx.pc
+pkgconfig_DATA =			\
+	cmx.pc 				\
+	$(NULL)
 
 cmxincludedir = $(includedir)/cmx
 cmxinclude_HEADERS = 			\

@@ -6,4 +6,4 @@ includedir=@includedir@
 Name: CMX
 Description: C Meta Extensions
 Version: @VERSION@
-Cflags: -I${includedir}/cmx-1.0
+Cflags: -I${includedir}/cmx

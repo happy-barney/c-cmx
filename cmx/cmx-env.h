@@ -16,12 +16,12 @@
  **
  ** - CMX_MUTEX_INIT (Var)
  **   Expression to initialize mutex variable.
- **   Macro must expand as static expression of CMX_MUTEX_TYPE type.
+ **   Macro must expand as expression of CMX_MUTEX_TYPE type.
  **   Macro may define its own temporary variables suffixing Var parameter.
  **   Macro may expand into multistatement code.
  **
  **   Macro usage:
- **     Expr = CMX_MUTEX_INIT (Expr)
+ **     CMX_MUTEX_INIT (Expr)
  **
  ** - CMX_MUTEX_LOCK (Var)
  **   Lock mutex.

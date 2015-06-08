@@ -19,7 +19,7 @@
 #  endif
 
 #define CMX_ENV_POSIX_MUTEX_INIT(Var)                                  \
-    PTHREAD_MUTEX_INITIALIZER
+    ((Var) = PTHREAD_MUTEX_INITIALIZER)
 
 #  if CMX_MUTEX_INIT
 #  define CMX_MUTEX_INIT CMX_ENV_POSIX_MUTEX_INIT

@@ -18,8 +18,8 @@
 #  define CMX_MUTEX_TYPE CMX_ENV_GLIB_MUTEX_TYPE
 #  endif
 
-#define CMX_ENV_GLIB_MUTEX_INIT(Var)                                  \
-    { 0 }
+#define CMX_ENV_GLIB_MUTEX_INIT(Var)                                    \
+    ((Var) = (GMutex) { 0 })
 
 #  ifndef CMX_MUTEX_INIT
 #  define CMX_MUTEX_INIT CMX_ENV_GLIB_MUTEX_INIT

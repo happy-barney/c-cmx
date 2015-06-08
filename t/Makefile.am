@@ -1,11 +1,15 @@
 
-AM_CFLAGS = -I$(top_srcdir) -g
+AM_CFLAGS = 				\
+	-I$(top_srcdir)			\
+	$(NULL)
 
 TESTS = 				\
-	struct-refs			\
-	struct-shareable		\
-	local				\
+	struct-refs.t			\
+	struct-shareable.t		\
+	local.t				\
 	$(NULL)
+
+all: $(TESTS)
 
 check_PROGRAMS = 			\
 	$(TESTS)			\

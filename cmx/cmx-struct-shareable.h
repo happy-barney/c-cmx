@@ -2,42 +2,103 @@
 #ifndef CMX_STRUCT_SHAREABLE_H
 #define CMX_STRUCT_SHAREABLE_H 1
 
-/** @file
+/**
+ ** @file
  **
- ** @section Summary
+ ** @section Shareable structures
  **
- ** Provides standardized API for shareable structs.
+ ** These macros help you with implementation of shared struct API.
  **
- ** @section Proposed usage
+ ** Structs (instances) can be used directly or can be part of other structs.
+ ** When used directly in multithread environment one needs synchronized API.
  **
- ** Struct API will provide share function to enable synchronization.
+ ** Common approach is:
+ **     mutex_lock (self->mutex);
+ **     do_something with possible "if error unlock and return"
+ **     mutex_unlock (self->mutex);
  **
- ** Public API functions will be defined via skeleton:
- **   public_function (struct *ptr, ...) {
- **     return_type rv;
- **     CMX_STRUCT_SHAREABLE_SYNCHRONIZE (ptr) {
- **       rv = private_function (ptr, ...);
+ ** Although it is correct it has some problems:
+ ** - protected area is not clearly visible (same indent level for example)
+ ** - call of paired functions is not (and cannot be) verified by compiler
+ ** - it's quite noisy if mutex is optional
+ ** - lock/unlock call as well as mutex type differs between libraries
+ **
+ ** So compare it with CMX alternative:
+ **     CMX_STRUCT_SHAREABLE_SYNCHRONIZE (self) {
+ **        do something with possible "if error break"
+ **     }
+ **
+ ** @subsection Proposed usage (aka best practice)
+ **
+ ** @subsubsection API Function(s)
+ **
+ ** @fn struct XYZ * xyz_share (struct XYZ *ptr)
+ ** Enable synchronized of ptr instance
+ **
+ ** By default structures are not shared.
+ ** Synchronization (using access mutex) must be allowed by calling this function.
+ ** Once enabled synchronization cannot be disabled.
+ **
+ ** Function returns its argument.
+ **
+ ** @subsubsection Structure definition
+ **
+ ** Use CMX_STRUCT_SHAREABLE_DEFINE to provide necessary data.
+ ** Macro creates struct member with CMX_STRUCT_SHAREABLE_DEFINE name.
+ **
+ **     struct XYZ {
+ **         CMX_STRUCT_SHAREABLE_DEFINE;
+ **         ...;
  **     };
- **     return rv;
- **   }
  **
- ** @section API Functions
+ ** @subsubsection Structure constructor
  **
- ** @fn struct xyz * xyz_share (struct xyz *ptr)
- ** By default structures are not shared. Shareing (using access mutex) must
- ** be allowed by calling this function.
+ ** Use CMX_STRUCT_SHAREABLE_INIT() to initialize data
  **
- ** Turning shareing on is irrevertible.
+ **     struct XYZ * constructor (...) {
+ **         retval = malloc;
+ **         CMX_STRUCT_SHAREABLE_INIT (retval);
+ **         ...;
+ **     }
  **
- ** Function, as well as *_ref() proposed by cmx-struct-refs.h, returns
- ** it's argument.
+ ** CMX macros handles properly initialization with bzero() (ie static initialization)
  **
- ** @section Proposed usage
+ ** @subsubsection Enable shareing function
  **
- ** - use CMX_STRUCT_SHAREABLE_DEFINE in your structure definition
- ** - use CMX_STRUCT_SHAREABLE_INIT in your constructor
- ** - use CMX_STRUCT_SHAREABLE_SHARE to define your share function
- ** - call your share function to enable feature
+ ** Struct API should provide _share() function to enable synchronization.
+ **
+ **     struct XYZ * xyz_share (struct XYZ *self) {
+ **         CMX_STRUCT_SHAREABLE_SHARE (self);
+ **     }
+ **
+ ** @subsubsection API functions
+ **
+ ** CMX_STRUCT_SHAREABLE_SYNCHRONIZE() macro can detect enabled synchronization
+ ** and wraps following block with proper lock/unlock calls.
+ **
+ **     rettype xyz_function (struct XYZ *self, ...) {
+ **         rettype retval;
+ **         CMX_STRUCT_SHAREABLE_SYNCHRONIZE (self) {
+ **             ... do someting in protected area ...;
+ **         }
+ **         return retval;
+ **     }
+ **
+ ** Best practice is to provide public synchronized and private non-synchronized API
+ **
+ **     rettype xyz_private_function (struct XYZ *self, ...) {
+ **         rettype retval;
+ **         ... do someting in protected area ...;
+ **         return retval;
+ **     }
+ **
+ **     rettype xyz_function (struct XYZ *self, ...) {
+ **         rettype retval;
+ **         CMX_STRUCT_SHAREABLE_SYNCHRONIZE (self) {
+ **             retval = xyz_private_function (self, ...);
+ **         }
+ **         return retval;
+ **     }
  **/
 
 #include <cmx/cmx-env.h>
@@ -51,17 +112,25 @@ struct _CMX_Struct_Shareable {
 };
 
 #ifndef CMX_STRUCT_SHAREABLE_NAME
-#define CMX_STRUCT_SHAREABLE_NAME cmx_shareable
-/**<Structure member name generated and used by other macros.
- ** Default: cmx_shareable
+#define CMX_STRUCT_SHAREABLE_NAME                                       \
+    cmx_struct_shareable
+/**
+ **<@brief Structure member name generated and used by CMX_STRUCT_SHAREABLE_* macros.
+ **
+ ** Default: cmx_struct_shareable
+ **
+ ** You can override default value defining this macro before including cmx.h
+ **     #define CMX_STRUCT_SHAREABLE_NAME i_want_different_name
+ **     #include <cmx.h>
  **/
 #endif
 
 #define CMX_STRUCT_SHAREABLE_DEFINE                                     \
     struct _CMX_Struct_Shareable CMX_STRUCT_SHAREABLE_NAME
-/**<Structure member definition.
+/**
+ **<@brief Structure member definition.
  **
- ** Uses:
+ ** Uses other CMX macros:
  ** - CMX_STRUCT_SHAREABLE_NAME
  ** - CMX_MUTEX_TYPE
  **
@@ -77,7 +146,11 @@ struct _CMX_Struct_Shareable {
         if (NULL != (Ptr))                                              \
             (Ptr)->CMX_STRUCT_SHAREABLE_NAME.enabled = 0;               \
     } while (0);
-/**<Initialize data declared by CMX_STRUCT_SHAREABLE_DEFINE
+/**
+ **<@brief Initialize data declared by CMX_STRUCT_SHAREABLE_DEFINE
+ **
+ ** You have to use this macro if you initialize dynamically allocated
+ ** memory unless you clear whole structure with zeros (bzero())
  **/
 
 #define CMX_STRUCT_SHAREABLE_SHARE(Ptr)                                 \
@@ -85,20 +158,25 @@ struct _CMX_Struct_Shareable {
         CMX_UNIQUE_TOKEN (CMX_STRUCT_SHAREABLE_SHARE),                  \
         (Ptr)                                                           \
     )
-/**<Defines core body of *_share function.
+/**
+ **<@brief Defines core body of *_share function.
+ **
  ** Macro recognizes following BLOCK and ELSE statements.
  **
  ** BLOCK is executed only once, when share is enabled
  ** ELSE is executed otherwise.
  **
+ ** Macro returns its argument
+ ** Macro generates NULL safe code (BLOCK is not executed then)
+ ** Macro allows 'break' in BLOCK.
+ ** Macro expands as single statement.
+ **
  ** @param Pointer to structure
  **
  ** Uses:
  ** - CMX_STRUCT_SHAREABLE_NAME
- ** - CMX_MUTEX_STATIC_INIT
- **
- ** Usage:
- ** struct xyz * xyz_share (struct xyz *)
+ ** - CMX_MUTEX_INIT
+ ** - CMX_META_BODY_ELSE_BREAK
  **/
 
 #define CMX_STRUCT_SHAREABLE_SHARE_TRAN(Prefix, Ptr)                    \
@@ -108,7 +186,8 @@ struct _CMX_Struct_Shareable {
         CMX_TOKEN (Prefix, Finish),                                     \
         (Ptr)                                                           \
     )
-/**<Transition macro to expand arguments and provide tokens required
+/**
+ **<Transition macro to expand arguments and provide tokens required
  ** by implementation macro.
  **/
 
@@ -127,8 +206,9 @@ struct _CMX_Struct_Shareable {
         }                                                               \
     Finish:                                                             \
         return (Ptr);                                                   \
-    } CMX_META_BODY_ELSE_BREAK (Body, Else, Finish)
-/**<Implementation macro
+    } else CMX_META_BODY_ELSE_BREAK (Body, Else, Finish)
+/**
+ **<Implementation macro
  **/
 
 #define CMX_STRUCT_SHAREABLE_SYNCHRONIZE(Ptr)                           \
@@ -136,8 +216,11 @@ struct _CMX_Struct_Shareable {
         CMX_UNIQUE_TOKEN (CMX_STRUCT_SHAREABLE_SYNCHRONIZE),            \
         (Ptr)                                                           \
     )
-/**<Synchronize BLOCK evaluation using struct pointer.
- ** Synchronization is used only if struct sharing was enabled.
+/**
+ **<@brief Synchronize BLOCK evaluation using struct pointer.
+ **
+ ** Synchronization is used only if struct synchronization is enabled,
+ ** see CMX_STRUCT_SHAREABLE_SHARE()
  **
  ** @param Ptr struct pointer
  **
@@ -147,6 +230,10 @@ struct _CMX_Struct_Shareable {
  **
  ** Uses:
  ** - CMX_STRUCT_SHAREABLE_NAME
+ ** - CMX_MUTEX_LOCK
+ ** - CMX_MUTEX_UNLOCK
+ ** - CMX_META_BODY_BREAK
+ **
  ** Usage:
  **   type safe_function_foo (struct bar *ptr, ...) {
  **     type rv = DEFAULT;
@@ -158,32 +245,36 @@ struct _CMX_Struct_Shareable {
 
 #define CMX_STRUCT_SHAREABLE_SYNCHRONIZE_TRAN(Prefix, Ptr)              \
     CMX_STRUCT_SHAREABLE_SYNCHRONIZE_IMPL (                             \
+        CMX_TOKEN (Prefix, Enabled),                                    \
         CMX_TOKEN (Prefix, Body),                                       \
         CMX_TOKEN (Prefix, Finish),                                     \
         (Ptr)                                                           \
     )
-/**<Transition macro to expand arguments and provide tokens required
+/**
+ **<Transition macro to expand arguments and provide tokens required
  ** by implementation macro.
  **/
 
-#define CMX_STRUCT_SHAREABLE_SYNCHRONIZE_IMPL(Body, Finish, Ptr)        \
+#define CMX_STRUCT_SHAREABLE_SYNCHRONIZE_IMPL(Enabled, Body, Finish, Ptr) \
     if (1) {                                                            \
-        if ((NULL == (Ptr)))                                            \
-            ;                                                           \
-        else if (! (Ptr)->CMX_STRUCT_SHAREABLE_NAME.enabled)            \
-            goto Body;                                                  \
-        else {                                                          \
-            CMX_MUTEX_LOCK ((Ptr)->CMX_STRUCT_SHAREABLE_NAME.mutex);    \
+        int Enabled = 0;                                                \
+        if ((NULL != (Ptr))) {                                          \
+            Enabled = (Ptr)->CMX_STRUCT_SHAREABLE_NAME.enabled;         \
+            if (Enabled)                                                \
+                CMX_MUTEX_LOCK ((Ptr)->CMX_STRUCT_SHAREABLE_NAME.mutex); \
             goto Body;                                                  \
         }                                                               \
     Finish:                                                             \
-        if ((Ptr)->CMX_STRUCT_SHAREABLE_NAME.enabled)                   \
+        if (Enabled)                                                    \
             CMX_MUTEX_UNLOCK ((Ptr)->CMX_STRUCT_SHAREABLE_NAME.mutex);  \
     } else CMX_META_BODY_BREAK (Body, Finish)
-/**<Implementation macro
+/**
+ **<Implementation macro
  **
+ ** Implementation notes
  ** - if Struct ptr is NULL, skip protected block
- ** - if shareable is not enabled, skip mutex 
+ ** - if synchronization is not enabled, skip mutex
+ ** - synchronization status is preserved locally to prevent unlock without lock
  **/
 
 #endif  /* header guard */

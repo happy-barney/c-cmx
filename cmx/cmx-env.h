@@ -1,5 +1,6 @@
 
-/** @file
+/**
+ ** @file
  **
  ** Defines environment macros to use their environment implementation
  **
@@ -46,7 +47,6 @@
  ** - CMX_ATOMIC_INT_DECREMENT_AND_TEST (Var)
  **   Assign Value to Var. Var is a CMX_ATOMIC_INT_TYPE variable.
  **
- **
  ** @subsection Misc macros
  **
  ** Macros to use advantages of compiler extensions
@@ -71,11 +71,14 @@
 #ifndef CMX_ENV_H
 #define CMX_ENV_H 1
 
+/* library specific env */
 #include <cmx/cmx-env-glib.h>
 #include <cmx/cmx-env-posix.h>
 
+/* compiler specific env */
 #include <cmx/cmx-env-gcc.h>
 
+/* default implementation */
 #include <cmx/cmx-env-default.h>
 
 #endif  /* header guard */

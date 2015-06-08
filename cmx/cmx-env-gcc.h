@@ -2,10 +2,13 @@
 /** @file
  **
  ** CMX env macros using GCC extensions
+ **
+ ** Env file defines macros with CMX_ENV_GCC_ prefix.
+ ** Env file defines env dependant macros only if they are not defined yet.
  **/
 
-#ifndef CMX_ENV_GCC_DEFINE_H
-#define CMX_ENV_GCC_DEFINE_H 1
+#ifndef CMX_ENV_GCC_H
+#define CMX_ENV_GCC_H 1
 
 #ifdef __GNUC__
 

@@ -11,7 +11,7 @@
         VALUE,                                                          \
         DO,                                                             \
         CMX_UNIQUE_TOKEN (CMX_SYNCHRONIZE),                             \
-        CMX_MUTEX_STATIC_INIT,                                          \
+        CMX_MUTEX_CREATE,                                               \
         1                                                               \
     )
 /**<Synchronize following block
@@ -50,7 +50,7 @@
         VALUE,                                                          \
         COND,                                                           \
         CMX_UNIQUE_TOKEN (CMX_SYNCHRONIZE_IF),                          \
-        CMX_MUTEX_STATIC_INIT,                                          \
+        CMX_MUTEX_CREATE,                                               \
         Cond                                                            \
     )
 /**<Synchronize execution of following block with in-place mutex.

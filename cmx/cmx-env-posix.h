@@ -18,8 +18,15 @@
 #  define CMX_MUTEX_TYPE CMX_ENV_POSIX_MUTEX_TYPE
 #  endif
 
+#define CMX_ENV_POSIX_MUTEX_CREATE                                      \
+    PTHREAD_MUTEX_INITIALIZER
+
+#  if CMX_MUTEX_CREATE
+#  define CMX_MUTEX_CREATE CMX_ENV_POSIX_MUTEX_CREATE
+#  endif
+
 #define CMX_ENV_POSIX_MUTEX_INIT(Var)                                  \
-    ((Var) = PTHREAD_MUTEX_INITIALIZER)
+    ((Var) = CMX_MUTEX_CREATE)
 
 #  if CMX_MUTEX_INIT
 #  define CMX_MUTEX_INIT CMX_ENV_POSIX_MUTEX_INIT

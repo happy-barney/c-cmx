@@ -18,8 +18,15 @@
 #  define CMX_MUTEX_TYPE CMX_ENV_GLIB_MUTEX_TYPE
 #  endif
 
+#define CMX_ENV_GLIB_MUTEX_CREATE                                       \
+    { 0 }
+
+#  ifndef CMX_MUTEX_CREATE
+#  define CMX_MUTEX_CREATE CMX_ENV_GLIB_MUTEX_CREATE
+#  endif
+
 #define CMX_ENV_GLIB_MUTEX_INIT(Var)                                    \
-    ((Var) = (GMutex) { 0 })
+    Var = (CMX_MUTEX_TYPE) CMX_MUTEX_CREATE
 
 #  ifndef CMX_MUTEX_INIT
 #  define CMX_MUTEX_INIT CMX_ENV_GLIB_MUTEX_INIT
@@ -35,7 +42,7 @@
 #define CMX_ENV_GLIB_MUTEX_UNLOCK(Var)                                  \
     g_mutex_unlock (& (Var))
 
-#  ifndef CMX_ENV_GLIB_MUTEX_UNLOCK
+#  ifndef CMX_MUTEX_UNLOCK
 #  define CMX_MUTEX_UNLOCK CMX_ENV_GLIB_MUTEX_UNLOCK
 #  endif
 

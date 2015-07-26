@@ -7,8 +7,7 @@
 
 #define CMX_SYNCHRONIZE_INTERNAL_TRAN(Type, Do, Prefix, Init, Cond)     \
     CMX_SYNCHRONIZE_INTERNAL_IMPL (                                     \
-        CMX_SYNCHRONIZE_INTERNAL_MUTEX_##Type##_TYPE,                   \
-        CMX_SYNCHRONIZE_INTERNAL_MUTEX_##Type##_VAR,                    \
+        CMX_SYNCHRONIZE_INTERNAL_MUTEX_##Type##_INIT,                   \
         CMX_SYNCHRONIZE_INTERNAL_DO_##Do##_JUMP,                        \
         CMX_SYNCHRONIZE_INTERNAL_DO_##Do##_BODY,                        \
         CMX_TOKEN (Prefix, Mutex),                                      \
@@ -37,18 +36,19 @@
  **/
 
 #define CMX_SYNCHRONIZE_INTERNAL_IMPL(                                  \
-    MUTEX_TYPE, MUTEX_VAR,                                              \
+    MUTEX_INIT,                                                         \
     DO_COND, DO_BODY,                                                   \
     Name, Body, Else, Finish,                                           \
     Init, Cond                                                          \
 )                                                                       \
     if (1) {                                                            \
-        CMX_MUTEX_TYPE MUTEX_TYPE (Name) = MUTEX_VAR ((Init));          \
-        CMX_MUTEX_LOCK (MUTEX_TYPE (Name));                             \
+        CMX_MUTEX_TYPE * Name;                                          \
+        MUTEX_INIT (Name, Init);                                        \
+        CMX_MUTEX_LOCK (*Name);                                         \
         DO_COND ((Cond), Body, Else);                                   \
     Finish:                                                             \
-        CMX_MUTEX_UNLOCK (MUTEX_TYPE (Name));                           \
-    } DO_BODY (Body, Else, Finish)
+        CMX_MUTEX_UNLOCK (*Name);                                       \
+    } else DO_BODY (Body, Else, Finish)
 /**<Implementation macro
  **
  ** @param MUTEX_TYPE What is internal variable (value or pointer)
@@ -57,17 +57,12 @@
  ** @param DO_BODY    Following block evaluation
  **/
 
-#define CMX_SYNCHRONIZE_INTERNAL_MUTEX_VALUE_TYPE(Name)                 \
-    Name
+#define CMX_SYNCHRONIZE_INTERNAL_MUTEX_VALUE_INIT(Name, Init)           \
+    static CMX_MUTEX_TYPE Name##_static = Init;                         \
+    Name = &Name##_static;
 
-#define CMX_SYNCHRONIZE_INTERNAL_MUTEX_VALUE_VAR(Value)                 \
-    Value
-
-#define CMX_SYNCHRONIZE_INTERNAL_MUTEX_PTR_TYPE(Name)                   \
-    * Name
-
-#define CMX_SYNCHRONIZE_INTERNAL_MUTEX_PTR_VAR(Value)                   \
-    & (Value)
+#define CMX_SYNCHRONIZE_INTERNAL_MUTEX_PTR_INIT(Name, Init)             \
+    Name = Init
 
 #define CMX_SYNCHRONIZE_INTERNAL_DO_DO_BODY(Body, Else, Finish)         \
     CMX_META_BODY_BREAK (Body, Finish)

@@ -7,6 +7,7 @@ TESTS = 				\
 	struct-refs.t			\
 	struct-shareable.t		\
 	local.t				\
+	synchronize.t			\
 	$(NULL)
 
 all: $(TESTS)

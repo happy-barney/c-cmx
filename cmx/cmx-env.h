@@ -23,6 +23,10 @@
  **   Macro usage:
  **     CMX_MUTEX_INIT (Expr)
  **
+ ** - CMX_MUTEX_CREATE
+ **   Expression that creates new mutex (eg. PTHREAD_MUTEX_INITIALIZER)
+ **   Macro is used to create anonymous mutexes.
+ **
  ** - CMX_MUTEX_LOCK (Var)
  **   Lock mutex.
  **   Var is a CMX_ATOMIC_TYPE variable.
